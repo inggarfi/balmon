@@ -1,1 +1,1 @@
-window.location.replace("https://cocowin78.com/daftar");
+window.location.replace("https://mamihoki89.com/m/register");
